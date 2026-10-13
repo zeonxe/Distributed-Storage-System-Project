@@ -30,6 +30,13 @@ class Master:
 
        self.nodes[node_id]["chunks"].append(chunk_id) 
 
+    def lookup_file(self, filename):
+        if filename not in self.metadata:
+            raise ValueError(f"File {filename} does not exist")
+
+        return self.metadata[filename]["chunks"]
+        
+
 master = Master()
 master.add_file("hello.txt", 10246)
 
@@ -45,5 +52,6 @@ master.add_chunk("hello.txt", "node_C", "chunk_2")
 
 print(master.metadata)
 print(master.nodes)
+print(master.lookup_file("missing.txt"))
 
         
