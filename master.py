@@ -35,23 +35,28 @@ class Master:
             raise ValueError(f"File {filename} does not exist")
 
         return self.metadata[filename]["chunks"]
+
+    def select_nodes(self, replication_factor=2):
+        return list(self.nodes.keys())[:replication_factor]
         
 
-master = Master()
-master.add_file("hello.txt", 10246)
 
 
-master.add_node("node_A")
-master.add_node("node_B")
-master.add_node("node_C")
+if __name__ == "__main__":
+    master = Master()
+    master.add_file("hello.txt", 10246)
+
+    master.add_node("node_A")
+    master.add_node("node_B")
+    master.add_node("node_C")
 
 
-master.add_chunk("hello.txt", "node_A", "chunk_0")
-master.add_chunk("hello.txt", "node_B", "chunk_1")
-master.add_chunk("hello.txt", "node_C", "chunk_2")
+    master.add_chunk("hello.txt", "node_A", "chunk_0")
+    master.add_chunk("hello.txt", "node_B", "chunk_1")
+    master.add_chunk("hello.txt", "node_C", "chunk_2")
 
-print(master.metadata)
-print(master.nodes)
-print(master.lookup_file("missing.txt"))
+    print(master.metadata)
+    print(master.nodes)
+    print(master.lookup_file("missing.txt"))
 
         

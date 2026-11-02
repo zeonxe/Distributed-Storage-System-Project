@@ -11,24 +11,24 @@ class StorageNode:
         return self.storage[chunk_id]
             
          
+if __name__ == "__main__":
+    node_A = StorageNode("node_A")
+    node_B = StorageNode("node_B")
+    node_C = StorageNode("node_C")
 
-node_A = StorageNode("node_A")
-node_B = StorageNode("node_B")
-node_C = StorageNode("node_C")
+    node_A.store_chunk("chunk_0", "Hello World")
+    node_B.store_chunk("chunk_0", "Hello World")
 
-node_A.store_chunk("chunk_0", "Hello World")
-node_B.store_chunk("chunk_0", "Hello World")
-
-print(node_B.retrieve_data("chunk_0"))
+    print(node_B.retrieve_data("chunk_0"))
 
     
 
-print(node_A.node_id)
-print(node_A.storage)
+    print(node_A.node_id)
+    print(node_A.storage)
 
-print(node_B.node_id)
-print(node_B.storage)
+    print(node_B.node_id)
+    print(node_B.storage)
 
-print(node_C.node_id)
-print(node_C.storage)
+    print(node_C.node_id)
+    print(node_C.storage)
 
