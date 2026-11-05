@@ -15,6 +15,15 @@ class Client:
             self.master.add_chunk(filename, node_id, chunk_id)
 
 
+    def download_chunk(self, filename, chunk_id):
+        chunk_locations = self.master.lookup_file(filename)
+        for location in chunk_locations:
+            if location["chunk_id"] == chunk_id:
+                node_id = location["node_id"]
+                return self.storage_nodes[node_id].retrieve_data(chunk_id)
+
+
+
 
 master = Master()
 
@@ -46,3 +55,4 @@ print(client.master.metadata)
 print(client.storage_nodes["node_A"].node_id)
 print(master.nodes)
 print(master.select_nodes())
+print(client.download_chunk("hello.txt", "chunk_0"))
