@@ -20,7 +20,50 @@ class Client:
         for location in chunk_locations:
             if location["chunk_id"] == chunk_id:
                 node_id = location["node_id"]
-                return self.storage_nodes[node_id].retrieve_data(chunk_id)
+
+                try:
+                    return self.storage_nodes[node_id].retrieve_data(chunk_id)
+                except KeyError:
+                    print(f"Could not retrieve {chunk_id} from {node_id}. Trying next replica...")
+
+        raise ValueError(f"No available replica found for {chunk_id}")
+
+
+    def split_file(self, data, chunk_size=6):
+        chunks = []
+
+        for i in range(0, len(data), chunk_size):
+            chunk = data[i:i + chunk_size]
+            chunks.append(chunk)
+
+        return chunks
+
+
+    def upload_file(self, filename, data, chunk_size=6):
+        self.master.add_file(filename, len(data))
+
+        chunks = self.split_file(data, chunk_size)
+
+        for index, chunk in enumerate(chunks):
+            chunk_id = f"{filename}_chunk_{index}"
+            self.upload_chunk(filename, chunk_id, chunk)
+
+
+    def download_file(self, filename):
+        chunk_locations = self.master.lookup_file(filename)
+
+        chunk_ids = set()
+
+        for location in chunk_locations:
+            chunk_ids.add(location["chunk_id"])
+        
+        sorted_chunks = sorted(chunk_ids, key=lambda chunk_id: int(chunk_id.rsplit("_", 1)[1]))
+        print(sorted_chunks)
+
+
+
+
+    
 
 
 
@@ -56,3 +99,14 @@ print(client.storage_nodes["node_A"].node_id)
 print(master.nodes)
 print(master.select_nodes())
 print(client.download_chunk("hello.txt", "chunk_0"))
+
+
+node_A.storage.pop("chunk_0")
+print(client.download_chunk("hello.txt", "chunk_0"))
+
+print(client.split_file("Hello World Python", 4))
+
+client.upload_file("test.txt", "Hello World Python", 4)
+print(master.lookup_file("test.txt"))
+
+client.download_file("test.txt")
