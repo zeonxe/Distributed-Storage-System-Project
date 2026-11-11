@@ -23,7 +23,7 @@ class Client:
 
                 try:
                     return self.storage_nodes[node_id].retrieve_data(chunk_id)
-                except KeyError:
+                except (KeyError, ConnectionError):
                     print(f"Could not retrieve {chunk_id} from {node_id}. Trying next replica...")
 
         raise ValueError(f"No available replica found for {chunk_id}")
@@ -58,7 +58,13 @@ class Client:
             chunk_ids.add(location["chunk_id"])
         
         sorted_chunks = sorted(chunk_ids, key=lambda chunk_id: int(chunk_id.rsplit("_", 1)[1]))
-        print(sorted_chunks)
+        retrieved_chunks = []
+
+        for chunk_id in sorted_chunks:
+            data = self.download_chunk(filename, chunk_id)
+            retrieved_chunks.append(data)
+
+        return "".join(retrieved_chunks)
 
 
 
@@ -109,4 +115,14 @@ print(client.split_file("Hello World Python", 4))
 client.upload_file("test.txt", "Hello World Python", 4)
 print(master.lookup_file("test.txt"))
 
-client.download_file("test.txt")
+reconstructed_file = client.download_file("test.txt")
+print("Reconstructed file:", reconstructed_file)
+
+print(node_A.is_alive)
+node_A.is_alive = False
+print(client.download_file("test.txt"))
+
+
+
+print(node_A.is_alive)
+print(node_A.storage)

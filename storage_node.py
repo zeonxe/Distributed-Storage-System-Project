@@ -2,12 +2,19 @@ class StorageNode:
     def __init__(self, node_id):
         self.storage = {}
         self.node_id = node_id
+        self.is_alive = True
 
 
     def store_chunk(self, chunk_id, data):
+        if not self.is_alive:
+            raise ConnectionError(f"{self.node_id} is offline")
+        
         self.storage[chunk_id] = data
 
     def retrieve_data(self, chunk_id):
+        if not self.is_alive:
+            raise ConnectionError(f"{self.node_id} is offline")
+        
         return self.storage[chunk_id]
             
          
