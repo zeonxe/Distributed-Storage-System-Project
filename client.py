@@ -74,7 +74,7 @@ class Client:
 
 
 
-master = Master()
+
 
 node_A = StorageNode("node_A")
 node_B = StorageNode("node_B")
@@ -86,6 +86,8 @@ storage_nodes = {
     "node_C": node_C,
     
 }
+
+master = Master(storage_nodes)
 
 client = Client(master, storage_nodes)
 
@@ -126,3 +128,21 @@ print(client.download_file("test.txt"))
 
 print(node_A.is_alive)
 print(node_A.storage)
+
+print(master.storage_nodes["node_A"].is_alive)
+
+print("Healthy nodes selected:", master.select_nodes())
+
+chunk_id = "test.txt_chunk_0"
+
+data = node_B.retrieve_data(chunk_id)
+node_C.store_chunk(chunk_id, data)
+
+print("Node B:", node_B.storage)
+print("Node C:", node_C.storage)
+
+master.recover_node("node_A")
+
+print("Node C after recovery:", node_C.storage)
+print("Master nodes after recovery:", master.nodes)
+print("Recovered file:", client.download_file("test.txt"))
