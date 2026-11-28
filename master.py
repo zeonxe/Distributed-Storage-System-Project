@@ -1,14 +1,19 @@
+from threading import Lock
+
+
 class Master:
     def __init__(self, storage_nodes=None):
         self.metadata = {}
         self.nodes = {}
         self.storage_nodes = storage_nodes if storage_nodes is not None else {}
+        self.lock = Lock()
 
     def add_file(self, filename, filesize):
-        self.metadata[filename] = {
-            "filesize": filesize,
-            "chunks": []
-        }
+        with self.lock:
+            self.metadata[filename] = {
+                "filesize": filesize,
+                "chunks": []
+            }
 
     def add_node(self, node_id):
         self.nodes[node_id] = {
@@ -18,18 +23,19 @@ class Master:
 
 
     def add_chunk(self, filename, node_id, chunk_id):
-       if filename not in self.metadata:
-           raise ValueError(f"File {filename} does not exist")
-       if node_id not in self.nodes:
-           raise ValueError(f"Node {node_id} does not exist")
+        with self.lock:
+            if filename not in self.metadata:
+                raise ValueError(f"File {filename} does not exist")
+            if node_id not in self.nodes:
+                raise ValueError(f"Node {node_id} does not exist")
 
-        # Track the chunk and its storage location
-       self.metadata[filename]["chunks"].append({
-           "chunk_id": chunk_id,
-           "node_id": node_id
-       })
+            # Track the chunk and its storage location
+            self.metadata[filename]["chunks"].append({
+                "chunk_id": chunk_id,
+                "node_id": node_id
+            })
 
-       self.nodes[node_id]["chunks"].append(chunk_id) 
+            self.nodes[node_id]["chunks"].append(chunk_id) 
 
     def lookup_file(self, filename):
         if filename not in self.metadata:
@@ -44,6 +50,10 @@ class Master:
             if self.storage_nodes[node_id].is_alive:
                 healthy_nodes.append(node_id)
 
+            
+        if len(healthy_nodes) < replication_factor:
+            raise ValueError("Not enough healthy nodes for replication")
+        
         return healthy_nodes[:replication_factor]
 
     def recover_node(self, failed_node_id):
